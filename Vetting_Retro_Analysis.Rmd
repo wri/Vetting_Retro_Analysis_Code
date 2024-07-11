@@ -46,16 +46,16 @@ key_coefficient_names <- names(key_coefficients)
 
 key_coefficient_data <- data.frame(coefficient = abs(key_coefficients), name = key_coefficient_names)
 
-# sorting and slicing into top 5 and bottom 5
+# sorting and slicing into top 10 and bottom 10
 key_coefficient_data <- key_coefficient_data[order(key_coefficient_data$coefficient, decreasing = TRUE), ]
 
-vetting_top_predictors <- key_coefficient_data[1:5, ]
-vetting_bottom_predictors <- key_coefficient_data[(nrow(key_coefficient_data) - 4):nrow(key_coefficient_data), ]
+vetting_top_predictors <- key_coefficient_data[1:10, ]
+vetting_bottom_predictors <- key_coefficient_data[(nrow(key_coefficient_data) - 9):nrow(key_coefficient_data), ]
 
-print("Top 5 Strongest Predictors:")
+print("Top 10 Strongest Predictors:")
 print(vetting_top_predictors)
 
-print("\nBottom 5 Weakest Predictors:")
+print("Bottom 10 Weakest Predictors:")
 print(vetting_bottom_predictors)
 
 
