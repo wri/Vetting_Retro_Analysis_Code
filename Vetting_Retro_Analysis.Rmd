@@ -1,0 +1,63 @@
+
+## Prep Steps ##
+
+install.packages("sf")
+install.packages("tidyverse")
+install.packages("tidycensus")
+install.packages("tmap")
+install.packages("data.table")
+install.packages("base")
+install.packages("snakecase")
+
+library(sf)
+library(tidyverse)
+library(tidycensus)
+library(tmap)
+library(data.table)
+library(base)
+library(snakecase)
+
+setwd("/Users/neilstein/Documents/Work/WRI/Research/TerraFund Vetting")
+TF_Vetting <- read.csv("Applications-TF Landscapes Ratings Fields.csv", header = T)
+
+## First Analysis - Key Factors to Selection ##
+
+# converting selection to booleans
+TF_Vetting$Project_Outcome <- ifelse(TF_Vetting$Final.Application.Decision == "Selected",1,0)
+
+# dealing with NA values
+TF_Vetting <- replace(TF_Vetting, is.na(TF_Vetting), 0)
+
+# preparing exclusions
+excluded_cols <- c( "Airtable.Application.ID", "Organization.Name.Clean..lookup.", "Project.Name", "Cohort", "Application.Type", "Final.Application.Decision", "Organization.Type..lookup.", "Project_Outcome")
+lm_all <- TF_Vetting$Project_Outcome ~ .[ !names(.) %in% excluded_cols]
+
+# filtering to streamline the review
+filt_data <- TF_Vetting[, !names(TF_Vetting) %in% excluded_cols]
+
+# first pass model -- looks good!
+
+vetting_all_model <- lm(forumla = lm_all, data = filt_data)
+summary(vetting_all_model)
+
+# filtering results to find our strongest and weakest predictors
+key_coefficients <- coef(vetting_all_model)
+key_coefficient_names <- names(key_coefficients)
+
+key_coefficient_data <- data.frame(coefficient = abs(key_coefficients), name = key_coefficient_names)
+
+# sorting and slicing into top 5 and bottom 5
+key_coefficient_data <- key_coefficient_data[order(key_coefficient_data$coefficient, decreasing = TRUE), ]
+
+vetting_top_predictors <- key_coefficient_data[1:5, ]
+vetting_bottom_predictors <- key_coefficient_data[(nrow(key_coefficient_data) - 4):nrow(key_coefficient_data), ]
+
+print("Top 5 Strongest Predictors:")
+print(vetting_top_predictors)
+
+print("\nBottom 5 Weakest Predictors:")
+print(vetting_bottom_predictors)
+
+
+
+
