@@ -8,6 +8,7 @@ install.packages("tmap")
 install.packages("data.table")
 install.packages("base")
 install.packages("snakecase")
+install.packages("car")
 
 library(sf)
 library(tidyverse)
@@ -16,11 +17,14 @@ library(tmap)
 library(data.table)
 library(base)
 library(snakecase)
+library(car)
 
 setwd("/Users/neilstein/Documents/Work/WRI/Research/TerraFund Vetting")
 TF_Vetting <- read.csv("Applications-TF Landscapes Ratings Fields.csv", header = T)
+HBF_Vetting <- read.csv("HBF_Vetting_Scores.csv", header = T)
+LA_Vetting <- read.csv("LA24_Vetting_Scores.csv", header = T)
 
-## First Analysis - Key Factors to Selection ##
+## First Round Analysis - Key Factors to Selection for TerraFund Landscapes ##
 
 # converting selection to booleans
 TF_Vetting$Project_Outcome <- ifelse(TF_Vetting$Final.Application.Decision == "Selected",1,0)
@@ -58,10 +62,111 @@ print(vetting_top_predictors)
 print("Bottom 15 Weakest Predictors:")
 print(vetting_bottom_predictors)
 
+write_csv(vetting_top_predictors, file = "vetting_top_predictors.csv")
+write_csv(vetting_bottom_predictors, file = "vetting_bottom_predictors.csv")
 
 
 
-## Second Analysis - Key Factors to Selection ##
+
+## First Round Analysis - Key Factors to Selection for HBF Selection ##
+
+# cleaning field titles
+names(HBF_Vetting) <- to_snake_case(names(HBF_Vetting))
+
+# converting selection to booleans
+HBF_Vetting$Project_Outcome <- ifelse(HBF_Vetting$final_decision_for_rfp == "Pass to DD/Interview Stage",1,0)
+
+# dealing with NA values
+HBF_Vetting <- replace(HBF_Vetting, is.na(HBF_Vetting), 0)
+
+# preparing exclusions
+excluded_cols_HBF <- c("organisation_name", "project_id", "rfp_b_organization_type", "gen_rfp_first_reviewer_final_recommendation", "exp_rfp_second_reviewer_final_recommendation", "final_selection_decision_process_closing", "final_decision_for_rfp", "Project_Outcome")
+
+# using this step only for Non-Profit analysis
+FP_Only_cols_HBF <- c("gen_rfp_fp_rating_of_fpc_farmer_membership","exp_rfp_fp_rating_of_fpc_farmer_membership", "gen_rfp_fp_rating_of_fpc_support_entities", "exp_rfp_fp_rating_of_fpc_support_entities", "gen_rfp_fp_rating_of_fpc_bo_d_composition", "exp_rfp_fp_rating_of_fpc_bo_d_composition", "gen_rfp_fp_rating_of_fpc_management_involvement", "exp_rfp_fp_rating_of_fpc_management_involvement", "review_gen_rfp_fp_rating_of_projected_2023_2024_revenue", "review_exp_rfp_fp_rating_of_projected_2023_2024_revenue", "gen_rfp_fp_rating_of_income_generation_explanation", "exp_rfp_fp_rating_of_income_generation_explanation", "gen_rfp_fp_rating_of_loan_debt_response", "exp_rfp_fp_rating_of_loan_debt_response", "gen_rfp_fp_rating_of_financing_ask", "exp_rfp_fp_rating_of_financing_ask", "gen_rfp_fp_rating_of_proposed_use_of_funds", "exp_rfp_fp_rating_of_proposed_use_of_funds", "gen_rfp_rating_of_business_innovation", "exp_rfp_rating_of_business_innovation", "gen_rfp_rating_of_market_potential", "exp_rfp_rating_of_market_potential", "gen_rfp_rating_of_product_service_availability", "exp_rfp_rating_of_product_service_availability", "gen_rfp_rating_of_product_service_availability", "exp_rfp_rating_of_product_service_availability", "gen_rfp_rating_of_growth_envisioned_description", "exp_rfp_rating_of_growth_envisioned_description", "gen_rfp_rating_of_limitations_on_operational_growth", "exp_rfp_rating_of_limitations_on_operational_growth", "gen_rfp_rating_of_financial_stability_risks", "exp_rfp_rating_of_financial_stability_risks")
+
+#additional filtering to focus on non-profit entities
+HBF_filt_data_NP <- HBF_Vetting[HBF_Vetting$rfp_b_organization_type == "Non-Profit Organization", ]
+
+# filtering to streamline the review, removing non-numerical and for-profit exclusive columns
+HBF_filt_data_NP <- HBF_filt_data_NP[, !names(HBF_filt_data_NP) %in% excluded_cols_HBF]
+HBF_filt_data_NP <- HBF_filt_data_NP[, !names(HBF_filt_data_NP) %in% FP_Only_cols_HBF]
+
+lm_HBF_all <- HBF_filt_data_NP$Project_Outcome ~ .[ !names(.) %in% excluded_cols_HBF]
+
+# first pass model -- looks good!
+
+vetting_HBF_model <- lm(forumla = lm_HBF_all, data = HBF_filt_data_NP)
+summary(vetting_HBF_model)
+
+# filtering results to find our strongest and weakest predictors
+HBF_key_coefficients <- coef(vetting_HBF_model)
+HBF_key_coefficient_names <- names(HBF_key_coefficients)
+
+HBF_key_coefficient_data <- data.frame(coefficient = abs(HBF_key_coefficients), name = HBF_key_coefficient_names)
+
+# sorting and slicing into top 10 and bottom 10
+HBF_key_coefficient_data <- HBF_key_coefficient_data[order(HBF_key_coefficient_data$coefficient, decreasing = TRUE), ]
+
+HBF_vetting_top_predictors <- HBF_key_coefficient_data[1:15, ]
+HBF_vetting_bottom_predictors <- HBF_key_coefficient_data[(nrow(HBF_key_coefficient_data) - 14):nrow(HBF_key_coefficient_data), ]
+
+print("Top 15 Strongest Predictors:")
+print(HBF_vetting_top_predictors)
+
+print("Bottom 15 Weakest Predictors:")
+print(HBF_vetting_bottom_predictors)
+
+write_csv(HBF_vetting_top_predictors, file = "HBF_vetting_top_predictors.csv")
+write_csv(HBF_vetting_bottom_predictors, file = "HBF_vetting_bottom_predictors.csv")
+
+
+
+## First Round Analysis - Key Factors to Selection for LA24 Selection ##
+
+# cleaning field titles
+names(LA_Vetting) <- to_snake_case(names(LA_Vetting))
+
+# converting selection to booleans
+LA_Vetting$Project_Outcome <- ifelse(LA_Vetting$x_review_acceptance == "Accept",1,0)
+
+# dealing with NA values
+LA_Vetting <- replace(LA_Vetting, is.na(LA_Vetting), 0)
+
+# preparing exclusions
+excluded_cols_LA <- c("name_organisation", "x_terra_match_application_uuid", "x_review_acceptance", "x_wri_review_landscape_program_stage_recommendation", "x_review_mdf_landscape_program_stage_recommendation", "x_review_apf_landscape_program_stage_recommendation", "x_review_wi_landscape_program_stage_recommendation", "x_review_aaa_landscape_program_stage_recommendation","x_review_mkh_landscape_program_stage_recommendation")
+
+# filtering to streamline the review, removing non-numerical and for-profit exclusive columns
+LA_filt_data <- LA_Vetting[, !names(LA_Vetting) %in% excluded_cols_LA]
+
+lm_LA_all <- LA_filt_data_NP$Project_Outcome ~ .[ !names(.) %in% excluded_cols_LA]
+
+# first pass model -- looks good!
+
+vetting_LA_model <- lm(forumla = lm_LA_all, data = LA_filt_data)
+summary(vetting_LA_model)
+
+# filtering results to find our strongest and weakest predictors
+LA_key_coefficients <- coef(vetting_LA_model)
+LA_key_coefficient_names <- names(LA_key_coefficients)
+
+LA_key_coefficient_data <- data.frame(coefficient = abs(LA_key_coefficients), name = LA_key_coefficient_names)
+
+# sorting and slicing into top 10 and bottom 10
+LA_key_coefficient_data <- LA_key_coefficient_data[order(LA_key_coefficient_data$coefficient, decreasing = TRUE), ]
+
+LA_vetting_top_predictors <- LA_key_coefficient_data[1:15, ]
+LA_vetting_bottom_predictors <- LA_key_coefficient_data[(nrow(LA_key_coefficient_data) - 14):nrow(LA_key_coefficient_data), ]
+
+print("Top 15 Strongest Predictors:")
+print(LA_vetting_top_predictors)
+
+print("Bottom 15 Weakest Predictors:")
+print(LA_vetting_bottom_predictors)
+
+write_csv(LA_vetting_top_predictors, file = "LA_vetting_top_predictors.csv")
+write_csv(LA_vetting_bottom_predictors, file = "LA_vetting_bottom_predictors.csv")
+
 
 
 
