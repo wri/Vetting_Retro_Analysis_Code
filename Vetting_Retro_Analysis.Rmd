@@ -169,5 +169,25 @@ write_csv(LA_vetting_bottom_predictors, file = "LA_vetting_bottom_predictors.csv
 
 
 
+## Second Major Analysis -- Fuzzy RDD on our selected applicants ##
+# TerraFund Landscapes #
+TF_RDD <- read.csv("Applications-TF Landscapes Ratings Fields.csv", header = T)
+names(TF_RDD) <- to_snake_case(names(TF_RDD))
+TF_RDD <- replace(TF_RDD, is.na(TF_RDD), 0)
+TF_RDD$project_outcome <- ifelse(TF_RDD$final_application_decision == "Selected",1,0)
+View(TF_RDD)
+
+# focusing on on numeric columns only
+TF_excluded_cols <- c( "airtable_application_id", "organization_name_clean_lookup", "project_name", "cohort", "application_type", "final_application_decision", "organization_type_lookup")
+TF_numeric_cols <- sapply(TF_RDD, is.numeric)
+
+# calculating an average 'GPA' in order to create a baseline spectrum
+TF_RDD <- TF_RDD %>%
+  mutate(average = rowMeans(TF_RDD[, TF_numeric_cols], na.rm = TRUE))
+
+
+
+
+
 
 
