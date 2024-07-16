@@ -9,6 +9,11 @@ install.packages("data.table")
 install.packages("base")
 install.packages("snakecase")
 install.packages("car")
+install.packages("broom")
+install.packages("rdrobust")
+install.packages("estimatr")
+install.packages("modelsummary")
+install.packages("kableExtra")
 
 library(sf)
 library(tidyverse)
@@ -18,6 +23,12 @@ library(data.table)
 library(base)
 library(snakecase)
 library(car)
+library(broom)
+library(rdrobust)
+library(estimatr)
+library(modelsummary)
+library(kableExtra)
+
 
 setwd("/Users/neilstein/Documents/Work/WRI/Research/TerraFund Vetting")
 TF_Vetting <- read.csv("Applications-TF Landscapes Ratings Fields.csv", header = T)
@@ -181,9 +192,16 @@ View(TF_RDD)
 TF_excluded_cols <- c( "airtable_application_id", "organization_name_clean_lookup", "project_name", "cohort", "application_type", "final_application_decision", "organization_type_lookup")
 TF_numeric_cols <- sapply(TF_RDD, is.numeric)
 
+# due to scoring inconsistencies in the for-profit side I will be removing their applications
+TF_RDD <- TF_RDD[TF_RDD$organization_type_lookup == "Non-Profit Organization", ]
+
 # calculating an average 'GPA' in order to create a baseline spectrum
 TF_RDD <- TF_RDD %>%
   mutate(average = rowMeans(TF_RDD[, TF_numeric_cols], na.rm = TRUE))
+
+
+# creating groupings to explore the 'fuzziness' of the RDD
+
 
 
 
