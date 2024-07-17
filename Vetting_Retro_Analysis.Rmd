@@ -199,9 +199,35 @@ TF_RDD <- TF_RDD[TF_RDD$organization_type_lookup == "Non-Profit Organization", ]
 TF_RDD <- TF_RDD %>%
   mutate(average = rowMeans(TF_RDD[, TF_numeric_cols], na.rm = TRUE))
 
-
 # creating groupings to explore the 'fuzziness' of the RDD
+# first, need to collect the column titles
+TF_RDD_all_cols <- names(TF_RDD)
+TF_RDD_col_titles <- TF_RDD_all_cols[!TF_RDD_all_cols %in% TF_excluded_cols]
+write.csv(TF_RDD_col_titles, file = "TF_landscapes_titles.csv", row.names = FALSE, quote = FALSE)
 
+#the thematic groupings were created offline and are available in the guidance document on Sharepoint
+TFL_themes <- read.csv("tfl_themes.csv")
+names(TFL_themes) <- to_snake_case(names(TFL_themes))
+
+# for loop to build out our models
+
+for (theme in TFL_themes$thematic_area) {
+  theme_cols <- TFL_themes[TFL_themes$thematic_area == theme, "fields_involved"]
+  theme_cols <- strsplit(theme_cols, ",", simplify = TRUE)[[1]]
+  
+  valid_cols <- intersect(theme_cols, names(TF_RDD))
+  if (length(valid_cols) > 0) {
+    theme_data <- TF_RDD[, valid_cols]  # Define theme_data only once
+    project_outcome <- "project_outcome"
+    
+  model <- rdrobust(theme_data, project_outcome ~ ., fuzzy = TRUE)
+  if (!is.null(model)) {  # Check if model is not null
+    print(model)
+  } else {
+    cat("No valid model results for theme:", theme, "\n")
+  }
+cat("Results for theme:", theme, "\n")
+}
 
 
 
