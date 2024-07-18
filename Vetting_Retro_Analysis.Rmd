@@ -218,11 +218,11 @@ for (theme in TFL_themes$thematic_area) {
   
   valid_cols <- intersect(theme_cols, names(TF_RDD))
   if (length(valid_cols) > 0) {
-    theme_data <- TF_RDD[, valid_cols]  # Define theme_data only once
+    theme_data <- TF_RDD[, valid_cols]
     project_outcome <- "project_outcome"
     
   model <- rdrobust(theme_data, project_outcome ~ ., fuzzy = TRUE)
-  if (!is.null(model)) {  # Check if model is not null
+  if (!is.null(model)) {
     print(model)
   } else {
     cat("No valid model results for theme:", theme, "\n")
