@@ -214,7 +214,11 @@ org_mgmt <- c("letters_of_reference_grade", "expert_letters_of_reference_grade",
 
 org_hist <- c("hectares_restored_historically_rating", "expert_hectares_restored_historically_rating", "historic_tree_survival_rate_rating", "expert_historic_tree_survival_rate_rating", "trees_species_grown_historically_rating", "expert_trees_species_grown_historically_rating", "trees_restored_historically_rating", "expert_trees_restored_historically_rating", "geography_of_historic_work_rating", "expert_geography_of_historic_work_rating", "proposed_historic_land_tenure_rating", "expert_proposed_historic_land_tenure_rating", "historic_community_engagement_rating", "expert_historic_community_engagement_rating")
 
-prop_plan <- c()
+prop_plan <- c("tree_maintenance_plan_rating", "expert_tree_maintenance_plan_rating", "proposed_project_objectives_rating", "expert_proposed_project_objectives_rating", "project_timeline_rating", "expert_project_timeline_rating", "historic_monitoring_experience_rating", "expert_historic_monitoring_experience_rating", "risk_mitigation_rating", "expert_risk_mitigation_rating")
+
+prop_enviro <- c("proposed_boundary_rating", "expert_proposed_boundary_rating", "proposed_monitoring_and_maintenance_plan_rating", "expert_proposed_monitoring_and_maintenance_plan_rating", "rating_of_hectares_to_be_restored", "expert_rating_of_hectares_to_be_restored", "restoration_interventions_planned_rating", "expert_restoration_interventions_planned_rating", "proposed_species_of_trees_rating", "expert_proposed_species_of_trees_rating", "rating_of_trees_to_be_restored", "expert_rating_of_trees_to_be_restored", "rating_of_local_landscapes_assessment", "expert_rating_of_local_landscapes_assessment", "nursery_approach_rating", "expert_nursery_approach_rating", "environmental_goals_rating", "expert_environmental_goals_rating", "proposed_water_impact_rating", "expert_proposed_water_impact_rating")
+
+prop_social <- c("rating_of_project_beneficiaries", "expert_rating_of_project_beneficiaries", "proposed_partner_rating", "expert_proposed_partner_rating", "proposed_socio_economic_impact_rating", "expert_proposed_socio_economic_impact_rating", "rating_of_jobs_to_be_created", "expert_rating_of_jobs_to_be_created", "livelihood_degradation_impacts_rating", "expert_livelihood_degradation_impacts_rating", "proposed_food_impact_rating", "expert_proposed_food_impact_rating")
 
 # for loop to build out our models
 
