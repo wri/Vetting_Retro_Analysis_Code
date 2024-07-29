@@ -61,7 +61,7 @@ key_coefficient_names <- names(key_coefficients)
 
 key_coefficient_data <- data.frame(coefficient = abs(key_coefficients), name = key_coefficient_names)
 
-# sorting and slicing into top 10 and bottom 10
+# sorting and slicing into top 15 and bottom 15
 key_coefficient_data <- key_coefficient_data[order(key_coefficient_data$coefficient, decreasing = TRUE), ]
 
 vetting_top_predictors <- key_coefficient_data[1:15, ]
@@ -163,7 +163,7 @@ LA_key_coefficient_names <- names(LA_key_coefficients)
 
 LA_key_coefficient_data <- data.frame(coefficient = abs(LA_key_coefficients), name = LA_key_coefficient_names)
 
-# sorting and slicing into top 10 and bottom 10
+# sorting and slicing into top 15 and bottom 15
 LA_key_coefficient_data <- LA_key_coefficient_data[order(LA_key_coefficient_data$coefficient, decreasing = TRUE), ]
 
 LA_vetting_top_predictors <- LA_key_coefficient_data[1:15, ]
@@ -209,28 +209,60 @@ write.csv(TF_RDD_col_titles, file = "TF_landscapes_titles.csv", row.names = FALS
 TFL_themes <- read.csv("tfl_themes.csv")
 names(TFL_themes) <- to_snake_case(names(TFL_themes))
 
+# initial attempts to insert the themes automatically failed, hardcoding all themes:
+org_mgmt <- c("letters_of_reference_grade", "expert_letters_of_reference_grade", "organization_description_mission_grade", "expert_organization_description_grade", "organizational_composition_rating", "expert_organizational_composition_rating", "historic_funding_streams_rating", "expert_historic_funding_streams_rating", "historic_financial_strength_rating", "expert_historic_financial_strength_rating",  "historic_working_photos_rating", "expert_monitoring_photos_rating")
+
+org_hist <- c("hectares_restored_historically_rating", "expert_hectares_restored_historically_rating", "historic_tree_survival_rate_rating", "expert_historic_tree_survival_rate_rating", "trees_species_grown_historically_rating", "expert_trees_species_grown_historically_rating", "trees_restored_historically_rating", "expert_trees_restored_historically_rating", "geography_of_historic_work_rating", "expert_geography_of_historic_work_rating", "proposed_historic_land_tenure_rating", "expert_proposed_historic_land_tenure_rating", "historic_community_engagement_rating", "expert_historic_community_engagement_rating")
+
+prop_plan <- c()
 
 # for loop to build out our models
 
 for (theme in TFL_themes$thematic_area) {
   theme_cols <- TFL_themes[TFL_themes$thematic_area == theme, "fields_involved"]
-  theme_cols <- strsplit(theme_cols, ",", simplify = TRUE)[[1]]
+  theme_cols <- unlist(strsplit(theme_cols, ",")) %>% str_trim() %>% str_squish()
+  
+  # Debug: Print theme and columns involved
+  cat("\nTheme:", theme, "\n")
+  cat("Theme Columns:", theme_cols, "\n")
   
   valid_cols <- intersect(theme_cols, names(TF_RDD))
+  
+  # Debug: Print valid columns
+  cat("Valid Columns:", valid_cols, "\n")
+  
   if (length(valid_cols) > 0) {
-    theme_data <- TF_RDD[, valid_cols]
+    # Ensure the data is subset correctly and remove rows with missing values
+    theme_data <- TF_RDD[, c(valid_cols, "project_outcome"), drop = FALSE]  # Use drop = FALSE to avoid dropping dimensions
+    theme_data <- na.omit(theme_data)
+    
+    # Convert project_outcome to a factor if it's not already
+    theme_data$project_outcome <- as.factor(theme_data$project_outcome)
+    
     project_outcome <- "project_outcome"
     
-  model <- rdrobust(theme_data, project_outcome ~ ., fuzzy = TRUE)
-  if (!is.null(model)) {
-    print(model)
+    # Prepare the predictors and outcome for rdrobust
+    X <- theme_data[, valid_cols, drop = FALSE]
+    Y <- theme_data[[project_outcome]]
+    
+    # Call the rdrobust function
+    model <- tryCatch({
+      rdrobust(X, Y, fuzzy = TRUE)
+    }, error = function(e) {
+      cat("Error in rdrobust for theme:", theme, "\n", conditionMessage(e), "\n")
+      NULL
+    })
+    
+    if (!is.null(model)) {
+      print(model)
+    } else {
+      cat("No valid model results for theme:", theme, "\n")
+    }
+    cat("Results for theme:", theme, "\n")
   } else {
-    cat("No valid model results for theme:", theme, "\n")
+    cat("No valid columns for theme:", theme, "\n")
   }
-cat("Results for theme:", theme, "\n")
 }
-
-
 
 
 
