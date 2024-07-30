@@ -210,7 +210,12 @@ TFL_themes <- read.csv("tfl_themes.csv")
 names(TFL_themes) <- to_snake_case(names(TFL_themes))
 
 # initial attempts to insert the themes automatically failed, hardcoding all themes:
-org_mgmt <- c("letters_of_reference_grade", "expert_letters_of_reference_grade", "organization_description_mission_grade", "expert_organization_description_grade", "organizational_composition_rating", "expert_organizational_composition_rating", "historic_funding_streams_rating", "expert_historic_funding_streams_rating", "historic_financial_strength_rating", "expert_historic_financial_strength_rating",  "historic_working_photos_rating", "expert_monitoring_photos_rating")
+org_mgmt <- c("letters_of_reference_grade", "expert_letters_of_reference_grade", "organization_description_mission_grade", "expert_organization_description_grade", "organizational_composition_rating", "expert_organizational_composition_rating", "historic_funding_streams_rating", "expert_historic_funding_streams_rating", "historic_financial_strength_rating", "expert_historic_financial_strength_rating","historic_working_photos_rating", "expert_monitoring_photos_rating")
+
+# score by grouping
+TF_RDD <- TF_RDD %>%
+  mutate(org_mgmt_avg = rowMeans(select(., all_of(org_mgmt)), na.rm = TRUE))
+
 
 org_hist <- c("hectares_restored_historically_rating", "expert_hectares_restored_historically_rating", "historic_tree_survival_rate_rating", "expert_historic_tree_survival_rate_rating", "trees_species_grown_historically_rating", "expert_trees_species_grown_historically_rating", "trees_restored_historically_rating", "expert_trees_restored_historically_rating", "geography_of_historic_work_rating", "expert_geography_of_historic_work_rating", "proposed_historic_land_tenure_rating", "expert_proposed_historic_land_tenure_rating", "historic_community_engagement_rating", "expert_historic_community_engagement_rating")
 
