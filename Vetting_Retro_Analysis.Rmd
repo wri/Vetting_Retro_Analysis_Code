@@ -366,4 +366,50 @@ for (theme in TFL_themes$thematic_area) {
   }
 }
 
+# Plotting out our Fuzzy RDD - Organisational Management
 
+ggplot(TF_RDD, aes(x = average, y = org_mgmt_avg, color = final_application_decision)) +
+  geom_point(size = 1, alpha = 0.5) +
+  geom_smooth(data = filter(TF_RDD, average <= 3.457225), method = "lm") +
+  geom_smooth(data = filter(TF_RDD, average > 3.457225), method = "lm") +
+  geom_vline(xintercept = 3.457225) +
+  labs(x = "Overall Average", y = "Organisational Management Average", color = "Selected/Not Selected")
+
+# Plotting out our Fuzzy RDD - Organisational History
+
+ggplot(TF_RDD, aes(x = average, y = org_hist_avg, color = final_application_decision)) +
+  geom_point(size = 1, alpha = 0.5) +
+  geom_smooth(data = filter(TF_RDD, average <= 3.457225), method = "lm") +
+  geom_smooth(data = filter(TF_RDD, average > 3.457225), method = "lm") +
+  geom_vline(xintercept = 3.457225) +
+  labs(x = "Overall Average", y = "Organisational History", color = "Selected/Not Selected")
+
+
+# Plotting out our Fuzzy RDD - Proposed Project Plan
+
+ggplot(TF_RDD, aes(x = average, y = prop_plan_avg, color = final_application_decision)) +
+  geom_point(size = 1, alpha = 0.5) +
+  geom_smooth(data = filter(TF_RDD, average <= 3.457225), method = "lm") +
+  geom_smooth(data = filter(TF_RDD, average > 3.457225), method = "lm") +
+  geom_vline(xintercept = 3.457225) +
+  labs(x = "Overall Average", y = "Proposed Project Plan", color = "Selected/Not Selected")
+
+
+# Plotting out our Fuzzy RDD - Proposed Environmental Impact
+
+ggplot(TF_RDD, aes(x = average, y = prop_enviro_avg, color = final_application_decision)) +
+  geom_point(size = 1, alpha = 0.5) +
+  geom_smooth(data = filter(TF_RDD, average <= 3.457225), method = "lm") +
+  geom_smooth(data = filter(TF_RDD, average > 3.457225), method = "lm") +
+  geom_vline(xintercept = 3.457225) +
+  labs(x = "Overall Average", y = "Proposed Environmental Impact", color = "Selected/Not Selected")
+
+
+# Plotting out our Fuzzy RDD - Proposed Social Impact
+
+ggplot(TF_RDD, aes(x = average, y = prop_social_avg, color = final_application_decision)) +
+  geom_point(size = 1, alpha = 0.5) +
+  geom_smooth(data = filter(TF_RDD, average <= 3.457225), method = "lm") +
+  geom_smooth(data = filter(TF_RDD, average > 3.457225), method = "lm") +
+  geom_vline(xintercept = 3.457225) +
+  labs(x = "Overall Average", y = "Proposed Social Impact", color = "Selected/Not Selected")
