@@ -14,6 +14,10 @@ install.packages("rdrobust")
 install.packages("estimatr")
 install.packages("modelsummary")
 install.packages("kableExtra")
+install.packages("rpart")
+install.packages("rpart.plot")
+install.packages("randomForest")
+
 
 library(sf)
 library(tidyverse)
@@ -28,6 +32,9 @@ library(rdrobust)
 library(estimatr)
 library(modelsummary)
 library(kableExtra)
+library(rpart)
+library(rpart.plot)
+library(randomForest)
 
 
 setwd("/Users/neilstein/Documents/Work/WRI/Research/TerraFund Vetting")
@@ -180,6 +187,9 @@ write_csv(LA_vetting_bottom_predictors, file = "LA_vetting_bottom_predictors.csv
 
 
 
+
+
+
 ## Second Major Analysis -- Fuzzy RDD on our selected applicants ##
 # TerraFund Landscapes #
 TF_RDD <- read.csv("Applications-TF Landscapes Ratings Fields.csv", header = T)
@@ -198,6 +208,7 @@ TF_RDD <- TF_RDD[TF_RDD$organization_type_lookup == "Non-Profit Organization", ]
 # calculating an average 'GPA' in order to create a baseline spectrum
 TF_RDD <- TF_RDD %>%
   mutate(average = rowMeans(TF_RDD[, TF_numeric_cols], na.rm = TRUE))
+  
 
 # creating groupings to explore the 'fuzziness' of the RDD
 # first, need to collect the column titles
@@ -208,6 +219,7 @@ write.csv(TF_RDD_col_titles, file = "TF_landscapes_titles.csv", row.names = FALS
 #the thematic groupings were created offline and are available in the guidance document on Sharepoint
 TFL_themes <- read.csv("tfl_themes.csv")
 names(TFL_themes) <- to_snake_case(names(TFL_themes))
+
 
 # initial attempts to insert the themes automatically failed, hardcoding all themes:
 org_mgmt <- c("letters_of_reference_grade", "expert_letters_of_reference_grade", "organization_description_mission_grade", "expert_organization_description_grade", "organizational_composition_rating", "expert_organizational_composition_rating", "historic_funding_streams_rating", "expert_historic_funding_streams_rating", "historic_financial_strength_rating", "expert_historic_financial_strength_rating","historic_working_photos_rating", "expert_monitoring_photos_rating")
@@ -235,6 +247,22 @@ TF_RDD <- TF_RDD %>%
   
 TF_RDD <- TF_RDD %>%
   mutate(prop_social_avg = rowMeans(select(., all_of(prop_social)), na.rm = TRUE))
+  
+  
+
+# Testing our data -- decision tree model 
+TF_tree_model <- rpart(TF_RDD$final_application_decision ~ ., data = TF_RDD)
+rpart.plot(TF_tree_model)
+
+# pruning the tree model
+TF_pruned_model <- prune(TF_tree_model, cp = 0.1)
+rpart.plot(TF_pruned_model)
+
+# random forest modeling, another test to see our data better
+
+TF_rf_model <- randomForest(TF_RDD$final_application_decision ~ ., data = TF_RDD)
+importance(TF_rf_model)
+
 
 # for loop to build out our models
 
@@ -285,6 +313,57 @@ for (theme in TFL_themes$thematic_area) {
 }
 
 
+# improved approach
 
+for (theme in TFL_themes$thematic_area) {
+  theme_cols <- TFL_themes[TFL_themes$thematic_area == theme, "fields_involved"]
+  theme_cols <- unlist(strsplit(theme_cols, ",")) %>% str_trim() %>% str_squish()
+
+  # Debug: Print theme and columns involved
+  cat("\nTheme:", theme, "\n")
+  cat("Theme Columns:", theme_cols, "\n")
+
+  valid_cols <- intersect(theme_cols, names(TF_RDD))
+
+  # Debug: Print valid columns
+  cat("Valid Columns:", valid_cols, "\n")
+
+  if (length(valid_cols) > 0) {
+    # Ensure the data is subset correctly and remove rows with missing values
+    theme_data <- TF_RDD[, c(valid_cols, "project_outcome"), drop = FALSE]
+    theme_data <- na.omit(theme_data)
+
+    # Convert project_outcome to a factor if it's not already
+    theme_data$project_outcome <- as.factor(theme_data$project_outcome)
+
+    project_outcome <- "project_outcome"
+
+    # Prepare the predictors and outcome for rdrobust
+    X <- theme_data[, valid_cols, drop = FALSE]
+    Y <- theme_data[[project_outcome]]
+
+    # Check data types and dimensions
+    print(str(X))
+    print(str(Y))
+
+    # Call the rdrobust function with debugging
+    model <- tryCatch({
+      browser()  # Add breakpoint for interactive debugging
+      rdrobust(X, Y, fuzzy = TRUE)
+    }, error = function(e) {
+      cat("Error in rdrobust for theme:", theme, "\n", conditionMessage(e), "\n")
+      NULL
+    })
+
+    if (!is.null(model)) {
+      print(model)
+    } else {
+      cat("No valid model results for theme:", theme, "\n")
+    }
+    cat("Results for theme:", theme, "\n")
+  } else {
+    cat("No valid columns for theme:", theme, "\n")
+  }
+}
 
 
