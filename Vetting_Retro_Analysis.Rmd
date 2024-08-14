@@ -369,7 +369,7 @@ for (theme in TFL_themes$thematic_area) {
 # Neutral Plotting for Fuzzy RDD - FP vs. NP
 
 TF_RDD$entity_type <- ifelse(TF_RDD$organization_type_lookup == "Non-Profit Organization",1,0)
-ggplot(TF_RDD, aes(x= average, y= Entity Type, color = average <= 3.457225)) +
+ggplot(TF_RDD, aes(x= average, y= organization_type_lookup, color = final_application_decision)) +
   geom_point(size = 1.5, alpha = 0.5, position = position_jitter(width = 0, height = 0.25, seed = 1234)) + 
   geom_vline(xintercept = 3.457225) + 
   labs(x = "Overall Average Score", y = "Entity Type") + 
