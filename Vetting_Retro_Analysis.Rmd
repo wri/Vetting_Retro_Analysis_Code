@@ -422,3 +422,5 @@ ggplot(TF_RDD, aes(x = average, y = prop_social_avg, color = final_application_d
   geom_smooth(data = filter(TF_RDD, average > 3.457225), method = "lm") +
   geom_vline(xintercept = 3.457225) +
   labs(x = "Overall Average", y = "Proposed Social Impact", color = "Selected/Not Selected")
+  
+  
