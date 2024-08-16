@@ -465,7 +465,7 @@ TF_RDD <- TF_RDD %>%
   mutate(exp_avg = rowMeans(select(., all_of(exp_all)), na.rm = TRUE))
 
 
-ggplot(TF_RDD, aes(x= gen_avg, y= exp_all, color = final_application_decision)) +
+ggplot(TF_RDD, aes(x= gen_avg, y= exp_avg, color = final_application_decision)) +
   geom_point(size = 1.5, alpha = 0.5, position = position_jitter(width = 0, height = 0.25, seed = 1234)) + 
   geom_vline(xintercept = 3.457225) + 
   labs(x = "General Reviewer Average Score", y = "Expert Reviewer Average Score") + 
