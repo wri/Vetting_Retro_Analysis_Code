@@ -464,9 +464,37 @@ TF_RDD <- TF_RDD %>%
 TF_RDD <- TF_RDD %>%
   mutate(exp_avg = rowMeans(select(., all_of(exp_all)), na.rm = TRUE))
 
-
+# plotting the relationship between general and expert reviewers
 ggplot(TF_RDD, aes(x= gen_avg, y= exp_avg, color = final_application_decision)) +
   geom_point(size = 1.5, alpha = 0.5, position = position_jitter(width = 0, height = 0.25, seed = 1234)) + 
   geom_vline(xintercept = 3.457225) + 
   labs(x = "General Reviewer Average Score", y = "Expert Reviewer Average Score") + 
   guides(color = FALSE)
+
+
+
+# Harit Bharat Fund #
+HBF_RDD <- read.csv("HBF-RFP Application Fields Data.csv", header = T)
+names(HBF_RDD) <- to_snake_case(names(HBF_RDD))
+HBF_RDD <- replace(HBF_RDD, is.na(HBF_RDD), 0)
+HBF_RDD$project_outcome <- ifelse(HBF_RDD$final_decision_for_rfp == "Pass to DD/Interview Stage",1,0)
+View(HBF_RDD)
+
+# uniquely for HBF - we can do detailed groupings based on selection decision disagreement
+
+
+HBF_RDD <- HBF_RDD %>%
+   mutate(combined_review = case_when(
+     gen_rfp_first_reviewer_final_recommendation == "Pass" & exp_rfp_second_reviewer_final_recommendation == "Pass" ~ "Strong Pass",
+     (gen_rfp_first_reviewer_final_recommendation == "Pass" | exp_rfp_second_reviewer_final_recommendation == "Pass") & (gen_rfp_first_reviewer_final_recommendation == "Neutral/Not Sure" | exp_rfp_second_reviewer_final_recommendation == "Neutral/Not Sure") ~ "Weak Pass",
+     (gen_rfp_first_reviewer_final_recommendation == "Neutral/Not Sure" | exp_rfp_second_reviewer_final_recommendation == "Pass") & (gen_rfp_first_reviewer_final_recommendation == "Neutral/Not Sure" | exp_rfp_second_reviewer_final_recommendation == "Neutral/Not Sure") ~ "Weak Pass",
+     gen_rfp_first_reviewer_final_recommendation == "Neutral/Not Sure" & exp_rfp_second_reviewer_final_recommendation == "Neutral/Not Sure" ~ "True Neutral",
+     gen_rfp_first_reviewer_final_recommendation == "Pass" & exp_rfp_second_reviewer_final_recommendation == "Reject" ~ "Disagreement",
+     gen_rfp_first_reviewer_final_recommendation == "Reject" & exp_rfp_second_reviewer_final_recommendation == "Pass" ~ "Disagreement",
+     (gen_rfp_first_reviewer_final_recommendation == "Reject" | exp_rfp_second_reviewer_final_recommendation == "Reject") & (gen_rfp_first_reviewer_final_recommendation == "Neutral/Not Sure" | exp_rfp_second_reviewer_final_recommendation == "Neutral/Not Sure") ~ "Weak Reject",
+     (gen_rfp_first_reviewer_final_recommendation == "Neutral/Not Sure" | exp_rfp_second_reviewer_final_recommendation == "Reject") & (gen_rfp_first_reviewer_final_recommendation == "Neutral/Not Sure" | exp_rfp_second_reviewer_final_recommendation == "Neutral/Not Sure") ~ "Weak Reject",
+     gen_rfp_first_reviewer_final_recommendation == "Reject" & exp_rfp_second_reviewer_final_recommendation == "Reject" ~ "Strong Reject",
+     TRUE ~ NA_character_
+   ))
+
+
