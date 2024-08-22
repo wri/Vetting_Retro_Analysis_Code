@@ -482,7 +482,6 @@ View(HBF_RDD)
 
 # uniquely for HBF - we can do detailed groupings based on selection decision disagreement
 
-
 HBF_RDD <- HBF_RDD %>%
    mutate(combined_review = case_when(
      gen_rfp_first_reviewer_final_recommendation == "Pass" & exp_rfp_second_reviewer_final_recommendation == "Pass" ~ "Strong Pass",
@@ -496,5 +495,11 @@ HBF_RDD <- HBF_RDD %>%
      gen_rfp_first_reviewer_final_recommendation == "Reject" & exp_rfp_second_reviewer_final_recommendation == "Reject" ~ "Strong Reject",
      TRUE ~ NA_character_
    ))
+
+# creating groupings to explore the 'fuzziness' of the RDD
+# first, need to collect the column titles
+HBF_RDD_all_cols <- names(HBF_RDD)
+write.csv(HBF_RDD_all_cols, file = "HBF_titles.csv", row.names = FALSE, quote = FALSE)
+
 
 
