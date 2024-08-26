@@ -613,7 +613,7 @@ ggplot(HBF_RDD, aes(x = average, y = prop_social_avg, color = final_decision_for
   labs(x = "Overall Average", y = "Proposed Social Impact Average", color = "Selected/Not Selected")
 
 
-# Plotting out our Fuzzy RDD - Special focus on For-Profits
+# Plotting out our Fuzzy RDD - Special focus on For-Profits Specifically
 
 ggplot(filter(HBF_RDD, rfp_b_organization_type == "For-Profit Organization"), aes(x = average, y = fp_spec_avg, color = final_decision_for_rfp)) +
   geom_point(size = 1, alpha = 0.5) +
@@ -622,5 +622,3 @@ ggplot(filter(HBF_RDD, rfp_b_organization_type == "For-Profit Organization"), ae
   geom_vline(xintercept = 2.644065) +
   scale_color_manual(values = c("green", "red")) +
   labs(x = "Overall Average", y = "For-Profit Special Questions Average", color = "Selected/Not Selected")
-
-
