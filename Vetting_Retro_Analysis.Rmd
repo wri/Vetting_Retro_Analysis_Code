@@ -556,9 +556,11 @@ HBF_RDD <- HBF_RDD %>%
 
 # HBF Plotting -- Reviewer Breakdown
 
-ggplot(HBF_RDD, aes(x= average, y= combined_review, color = project_outcome)) +
+ggplot(HBF_RDD, aes(x= average, y= combined_review, color = final_decision_for_rfp)) +
   geom_point(size = 1.5, alpha = 0.5, position = position_jitter(width = 0, height = 0.25, seed = 1234)) + 
   geom_vline(xintercept = 2.644065) + 
+  scale_y_discrete(limits = c("Strong Pass", "Weak Pass", "Disagreement", "Weak Reject", "Strong Reject")) +  # improved order
+  scale_color_manual(values = c("Pass to DD/Interview Stage" = "#00843D", "Reject" = "#800000"), guide = FALSE) +
   labs(x = "Overall Average Score", y = "Application Outcome") + 
   guides(color = FALSE)
 
@@ -569,7 +571,7 @@ ggplot(HBF_RDD, aes(x = average, y = org_mgmt_avg, color = final_decision_for_rf
   geom_smooth(data = filter(HBF_RDD, average <= 2.644065), method = "lm") +
   geom_smooth(data = filter(HBF_RDD, average > 2.644065), method = "lm") +
   geom_vline(xintercept = 2.644065) +
-  scale_color_manual(values = c("green", "red")) +
+  scale_color_manual(values = c("#00843D", "#800000")) +
   labs(x = "Overall Average", y = "Organisational Management Average", color = "Selected/Not Selected")
 
 # Plotting out our Fuzzy RDD - Organisational Combined History
@@ -579,7 +581,7 @@ ggplot(HBF_RDD, aes(x = average, y = org_hist_avg, color = final_decision_for_rf
   geom_smooth(data = filter(HBF_RDD, average <= 2.644065), method = "lm") +
   geom_smooth(data = filter(HBF_RDD, average > 2.644065), method = "lm") +
   geom_vline(xintercept = 2.644065) +
-  scale_color_manual(values = c("green", "red")) +
+  scale_color_manual(values = c("#00843D", "#800000")) +
   labs(x = "Overall Average", y = "Organisational Combined History Average", color = "Selected/Not Selected")
 
 
@@ -590,7 +592,7 @@ ggplot(HBF_RDD, aes(x = average, y = prop_plan_avg, color = final_decision_for_r
   geom_smooth(data = filter(HBF_RDD, average <= 2.644065), method = "lm") +
   geom_smooth(data = filter(HBF_RDD, average > 2.644065), method = "lm") +
   geom_vline(xintercept = 2.644065) +
-  scale_color_manual(values = c("green", "red")) +
+  scale_color_manual(values = c("#00843D", "#800000")) +
   labs(x = "Overall Average", y = "Proposed Project Plan Average", color = "Selected/Not Selected")
 
 # Plotting out our Fuzzy RDD - Proposed Environmental Impact
@@ -600,7 +602,7 @@ ggplot(HBF_RDD, aes(x = average, y = prop_enviro_avg, color = final_decision_for
   geom_smooth(data = filter(HBF_RDD, average <= 2.644065), method = "lm") +
   geom_smooth(data = filter(HBF_RDD, average > 2.644065), method = "lm") +
   geom_vline(xintercept = 2.644065) +
-  scale_color_manual(values = c("green", "red")) +
+  scale_color_manual(values = c("#00843D", "#800000")) +
   labs(x = "Overall Average", y = "Proposed Environmental Impact Average", color = "Selected/Not Selected")
 
 # Plotting out our Fuzzy RDD - Proposed Social Impact
@@ -610,7 +612,7 @@ ggplot(HBF_RDD, aes(x = average, y = prop_social_avg, color = final_decision_for
   geom_smooth(data = filter(HBF_RDD, average <= 2.644065), method = "lm") +
   geom_smooth(data = filter(HBF_RDD, average > 2.644065), method = "lm") +
   geom_vline(xintercept = 2.644065) +
-  scale_color_manual(values = c("green", "red")) +
+  scale_color_manual(values = c("#00843D", "#800000")) +
   labs(x = "Overall Average", y = "Proposed Social Impact Average", color = "Selected/Not Selected")
 
 
@@ -621,5 +623,5 @@ ggplot(filter(HBF_RDD, rfp_b_organization_type == "For-Profit Organization"), ae
   geom_smooth(data = filter(HBF_RDD, average <= 2.644065), method = "lm") +
   geom_smooth(data = filter(HBF_RDD, average > 2.644065), method = "lm") +
   geom_vline(xintercept = 2.644065) +
-  scale_color_manual(values = c("green", "red")) +
+  scale_color_manual(values = c("#00843D", "#800000")) +
   labs(x = "Overall Average", y = "For-Profit Special Questions Average", color = "Selected/Not Selected")
