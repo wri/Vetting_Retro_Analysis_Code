@@ -480,6 +480,16 @@ HBF_RDD <- replace(HBF_RDD, is.na(HBF_RDD), 0)
 HBF_RDD$project_outcome <- ifelse(HBF_RDD$final_decision_for_rfp == "Pass to DD/Interview Stage",1,0)
 View(HBF_RDD)
 
+# Generalised average
+HBF_numeric_cols <- sapply(HBF_RDD, is.numeric)
+
+# calculating an average 'GPA' in order to create a baseline spectrum
+HBF_RDD <- HBF_RDD %>%
+  mutate(average = rowMeans(HBF_RDD[, HBF_numeric_cols], na.rm = TRUE))
+
+
+
+
 # uniquely for HBF - we can do detailed groupings based on selection decision disagreement
 
 HBF_RDD <- HBF_RDD %>%
@@ -497,9 +507,120 @@ HBF_RDD <- HBF_RDD %>%
    ))
 
 # creating groupings to explore the 'fuzziness' of the RDD
+
 # first, need to collect the column titles
 HBF_RDD_all_cols <- names(HBF_RDD)
 write.csv(HBF_RDD_all_cols, file = "HBF_titles.csv", row.names = FALSE, quote = FALSE)
 
+# Thematic coding uses the same theme names for HBF however there are more fields present that are folded under those labels
+hbf_org_mgmt <- c("gen_rfp_b_organisation_background_information_rating", "exp_rfp_b_organisation_background_information_rating", "gen_rfp_b_governance_forms_rating", "exp_rfp_b_governance_forms_rating", "gen_rfp_b_organization_mission_grade", "exp_rfp_b_organization_mission_grade", "gen_rfp_b_organisational_leadership_rating", "exp_rfp_b_organisational_leadership_rating", "gen_rfp_b_organisational_composition_rating", "exp_rfp_b_organisational_composition_rating", "gen_rfp_b_historic_financial_strength_rating", "exp_rfp_b_historic_financial_strength_rating", "gen_rfp_b_historic_funding_partners_rating", "exp_rfp_b_historic_funding_partners_rating", "gen_rfp_b_rating_of_historic_methods_of_raising_funds", "exp_rfp_b_rating_of_historic_methods_of_raising_funds", "gen_rfp_b_rating_of_historic_frameworks_standards_used", "exp_rfp_b_rating_of_historic_frameworks_standards_used", "gen_rfp_b_rating_of_historic_monitoring_evaluation", "exp_rfp_b_rating_of_historic_monitoring_evaluation", "gen_rfp_photo_quality_rating", "exp_rfp_photo_quality_rating", "gen_rfp_b_rating_of_historic_work_with_government", "exp_rfp_b_rating_of_historic_work_with_government")
+
+hbf_org_hist <- c("gen_rfp_b_years_of_restoration_experience_grade", "exp_rfp_b_years_of_restoration_experience_grade", "gen_rfp_b_landscape_description_rating", "exp_rfp_b_landscape_description_rating", "gen_rfp_b_historic_land_use_rating", "exp_rfp_b_historic_land_use_rating", "gen_rfp_b_historic_restoration_practices_rating", "exp_rfp_b_historic_restoration_practices_rating", "gen_rfp_b_detailed_historic_interventions_rating", "exp_rfp_b_detailed_historic_interventions_rating", "gen_rfp_b_hectares_restored_historically_rating", "exp_rfp_b_hectares_restored_historically_rating", "gen_rfp_b_hectares_restored_in_the_last_36_months_rating", "exp_rfp_b_hectares_restored_in_the_last_36_months_rating", "gen_rfp_b_trees_restored_historically_rating", "exp_rfp_b_trees_restored_historically_rating", "gen_rfp_b_trees_restored_in_the_last_36_months_rating", "exp_rfp_b_trees_restored_in_the_last_36_months_rating", "gen_rfp_b_survival_rate_rating", "exp_rfp_b_survival_rate_rating", "gen_rfp_b_rating_of_tree_species_grown_historically", "exp_rfp_b_rating_of_tree_species_grown_historically", "gen_rfp_b_rating_of_biodiversity_conservation_impacts", "exp_rfp_b_rating_of_biodiversity_conservation_impacts", "gen_rfp_b_rating_of_historic_restoration_strategies_used", "exp_rfp_b_rating_of_historic_restoration_strategies_used", "gen_rfp_b_description_of_historic_community_mobilization_efforts", "exp_rfp_b_description_of_historic_community_mobilization_efforts", "gen_rfp_b_marginalized_community_engagement_score", "exp_rfp_b_marginalized_community_engagement_score", "gen_rfp_b_rating_of_historic_community_beneficiaries", "exp_rfp_b_rating_of_historic_community_beneficiaries", "gen_rfp_b_past_community_engagement_farmers", "exp_rfp_b_past_community_engagement_farmers", "gen_rfp_b_past_community_engagement_women", "exp_rfp_b_past_community_engagement_women", "gen_rfp_b_past_community_engagement_youth_15_29_years_old", "exp_rfp_b_past_community_engagement_youth_15_29_years_old", "gen_rfp_b_past_community_engagement_landless_people", "exp_rfp_b_past_community_engagement_landless_people")
+
+hbf_prop_plan <- c("gen_rfp_b_project_objectives_rating", "exp_rfp_b_project_objectives_rating", "gen_rfp_proposed_budget_rating", "exp_rfp_proposed_budget_rating", "gen_rfp_rating_of_proposed_project_dates", "exp_rfp_rating_of_proposed_project_dates", "gen_rfp_rating_of_project_implementation_stages", "exp_rfp_rating_of_project_implementation_stages", "gen_rfp_rating_of_theory_of_change", "exp_rfp_rating_of_theory_of_change", "gen_rfp_b_rating_of_proposed_project_partners", "exp_rfp_rating_of_proposed_project_partners", "gen_rfp_rating_of_project_land_tenure", "exp_rfp_rating_of_project_land_tenure", "gen_rfp_rating_of_public_funding_government_connections", "exp_rfp_rating_of_public_funding_government_connections", "gen_rfp_rating_of_project_risks_description", "exp_rfp_rating_of_project_risks_description", "gen_rfp_rating_of_proposed_monitoring_verification", "exp_rfp_rating_of_proposed_monitoring_verification", "gen_rfp_rating_for_sustained_legacy_plan", "exp_rfp_rating_for_sustained_legacy_plan", "gen_rfp_rating_of_long_term_scaling_plan", "exp_rfp_rating_of_long_term_scaling_plan", "gen_rfp_rating_of_anticipated_challenges_explainer", "exp_rfp_rating_of_anticipated_challenges_explainer")
+
+hbf_prop_enviro <- c("gen_rfp_b_rating_of_proposed_land_use_system_s", "exp_rfp_b_rating_of_proposed_land_use_system_s", "gen_rfp_b_rating_of_proposed_restoration_interventions", "exp_rfp_b_rating_of_proposed_restoration_interventions", "gen_rfp_b_rating_of_detailed_proposed_restoration_interventions", "exp_rfp_b_rating_of_detailed_proposed_restoration_interventions", "gen_rfp_rating_of_proposed_project_location", "exp_rfp_rating_of_proposed_project_location", "gen_rfp_rating_of_project_biophysical_characteristics", "exp_rfp_rating_of_project_biophysical_characteristics", "gen_rfp_rating_of_proposed_hectares", "exp_rfp_rating_of_proposed_hectares", "gen_rfp_b_rating_of_trees_to_be_restored", "exp_rfp_b_rating_of_trees_to_be_restored", "gen_rfp_suitability_of_tree_species", "exp_rfp_suitability_of_tree_species", "gen_rfp_rating_of_proposed_environmental_impacts", "exp_rfp_rating_of_proposed_environmental_impacts", "gen_rfp_rating_of_proposed_source_of_trees", "exp_rfp_rating_of_proposed_source_of_trees", "gen_rfp_rating_of_proposed_water_source_impact", "exp_rfp_rating_of_proposed_water_source_impact", "gen_rfp_rating_of_water_system_impacts", "exp_rfp_rating_of_water_system_impacts", "gen_rfp_rating_of_climate_adaptation_resilience_impacts", "exp_rfp_rating_of_climate_adaptation_resilience_impacts", "gen_rfp_rating_of_soil_health_impacts", "exp_rfp_rating_of_soil_health_impacts")
+
+hbf_prop_social <- c("gen_rfp_rating_of_historic_livelihood_impacts_of_land_degradation", "exp_rfp_rating_of_historic_livelihood_impacts_of_land_degradation", "gen_rfp_proposed_livelihood_impacts_rating", "exp_rfp_proposed_livelihood_impacts_rating", "gen_rfp_rating_of_food_security_impacts", "exp_rfp_rating_of_food_security_impacts", "gen_rfp_rating_of_jobs_to_be_created", "exp_rfp_rating_of_jobs_to_be_created", "gen_rfp_rating_of_proposed_project_beneficiaries", "exp_rfp_rating_of_proposed_project_beneficiaries")
+
+# HBF For-Profit specific field groupings
+
+fp_spec_fields <- c("gen_rfp_fp_rating_of_income_generation_explanation", "exp_rfp_fp_rating_of_income_generation_explanation", "gen_rfp_fp_rating_of_loan_debt_response", "exp_rfp_fp_rating_of_loan_debt_response", "gen_rfp_fp_rating_of_financing_ask", "exp_rfp_fp_rating_of_financing_ask", "gen_rfp_fp_rating_of_proposed_use_of_funds", "exp_rfp_fp_rating_of_proposed_use_of_funds", "gen_rfp_rating_of_business_innovation", "exp_rfp_rating_of_business_innovation", "gen_rfp_rating_of_market_potential",  "exp_rfp_rating_of_market_potential",  "gen_rfp_rating_of_product_service_availability", "exp_rfp_rating_of_product_service_availability", "gen_rfp_rating_of_growth_envisioned_description", "exp_rfp_rating_of_growth_envisioned_description", "gen_rfp_rating_of_limitations_on_operational_growth", "exp_rfp_rating_of_limitations_on_operational_growth", "gen_rfp_rating_of_financial_stability_risks", "exp_rfp_rating_of_financial_stability_risks")
+
+fpc_combined <- c("gen_rfp_fp_rating_of_fpc_farmer_membership", "exp_rfp_fp_rating_of_fpc_farmer_membership", "gen_rfp_fp_rating_of_fpc_support_entities", "exp_rfp_fp_rating_of_fpc_support_entities", "gen_rfp_fp_rating_of_fpc_support_entities", "exp_rfp_fp_rating_of_fpc_support_entities", "gen_rfp_fp_rating_of_fpc_bo_d_composition", "exp_rfp_fp_rating_of_fpc_bo_d_composition", "gen_rfp_fp_rating_of_fpc_management_involvement", "exp_rfp_fp_rating_of_fpc_management_involvement")
+
+
+# average score by thematic grouping
+HBF_RDD <- HBF_RDD %>%
+  mutate(org_mgmt_avg = rowMeans(select(., all_of(hbf_org_mgmt)), na.rm = TRUE))
+
+HBF_RDD <- HBF_RDD %>%
+  mutate(org_hist_avg = rowMeans(select(., all_of(hbf_org_hist)), na.rm = TRUE))
+
+HBF_RDD <- HBF_RDD %>%
+  mutate(prop_plan_avg = rowMeans(select(., all_of(hbf_prop_plan)), na.rm = TRUE))
+  
+HBF_RDD <- HBF_RDD %>%
+  mutate(prop_enviro_avg = rowMeans(select(., all_of(hbf_prop_enviro)), na.rm = TRUE))
+  
+HBF_RDD <- HBF_RDD %>%
+  mutate(prop_social_avg = rowMeans(select(., all_of(hbf_prop_social)), na.rm = TRUE))
+
+HBF_RDD <- HBF_RDD %>%
+  mutate(fp_spec_avg = rowMeans(select(., all_of(fp_spec_fields)), na.rm = TRUE))
+
+HBF_RDD <- HBF_RDD %>%
+  mutate(FPC_avg = rowMeans(select(., all_of(fpc_combined)), na.rm = TRUE))
+
+
+# HBF Plotting -- Reviewer Breakdown
+
+ggplot(HBF_RDD, aes(x= average, y= combined_review, color = project_outcome)) +
+  geom_point(size = 1.5, alpha = 0.5, position = position_jitter(width = 0, height = 0.25, seed = 1234)) + 
+  geom_vline(xintercept = 2.644065) + 
+  labs(x = "Overall Average Score", y = "Application Outcome") + 
+  guides(color = FALSE)
+
+# Plotting out our Fuzzy RDD - Organisational Management
+
+ggplot(HBF_RDD, aes(x = average, y = org_mgmt_avg, color = final_decision_for_rfp)) +
+  geom_point(size = 1, alpha = 0.5) +
+  geom_smooth(data = filter(HBF_RDD, average <= 2.644065), method = "lm") +
+  geom_smooth(data = filter(HBF_RDD, average > 2.644065), method = "lm") +
+  geom_vline(xintercept = 2.644065) +
+  scale_color_manual(values = c("green", "red")) +
+  labs(x = "Overall Average", y = "Organisational Management Average", color = "Selected/Not Selected")
+
+# Plotting out our Fuzzy RDD - Organisational Combined History
+
+ggplot(HBF_RDD, aes(x = average, y = org_hist_avg, color = final_decision_for_rfp)) +
+  geom_point(size = 1, alpha = 0.5) +
+  geom_smooth(data = filter(HBF_RDD, average <= 2.644065), method = "lm") +
+  geom_smooth(data = filter(HBF_RDD, average > 2.644065), method = "lm") +
+  geom_vline(xintercept = 2.644065) +
+  scale_color_manual(values = c("green", "red")) +
+  labs(x = "Overall Average", y = "Organisational Combined History Average", color = "Selected/Not Selected")
+
+
+# Plotting out our Fuzzy RDD - Proposed Project Plan
+
+ggplot(HBF_RDD, aes(x = average, y = prop_plan_avg, color = final_decision_for_rfp)) +
+  geom_point(size = 1, alpha = 0.5) +
+  geom_smooth(data = filter(HBF_RDD, average <= 2.644065), method = "lm") +
+  geom_smooth(data = filter(HBF_RDD, average > 2.644065), method = "lm") +
+  geom_vline(xintercept = 2.644065) +
+  scale_color_manual(values = c("green", "red")) +
+  labs(x = "Overall Average", y = "Proposed Project Plan Average", color = "Selected/Not Selected")
+
+# Plotting out our Fuzzy RDD - Proposed Environmental Impact
+
+ggplot(HBF_RDD, aes(x = average, y = prop_enviro_avg, color = final_decision_for_rfp)) +
+  geom_point(size = 1, alpha = 0.5) +
+  geom_smooth(data = filter(HBF_RDD, average <= 2.644065), method = "lm") +
+  geom_smooth(data = filter(HBF_RDD, average > 2.644065), method = "lm") +
+  geom_vline(xintercept = 2.644065) +
+  scale_color_manual(values = c("green", "red")) +
+  labs(x = "Overall Average", y = "Proposed Environmental Impact Average", color = "Selected/Not Selected")
+
+# Plotting out our Fuzzy RDD - Proposed Social Impact
+
+ggplot(HBF_RDD, aes(x = average, y = prop_social_avg, color = final_decision_for_rfp)) +
+  geom_point(size = 1, alpha = 0.5) +
+  geom_smooth(data = filter(HBF_RDD, average <= 2.644065), method = "lm") +
+  geom_smooth(data = filter(HBF_RDD, average > 2.644065), method = "lm") +
+  geom_vline(xintercept = 2.644065) +
+  scale_color_manual(values = c("green", "red")) +
+  labs(x = "Overall Average", y = "Proposed Social Impact Average", color = "Selected/Not Selected")
+
+
+# Plotting out our Fuzzy RDD - Special focus on For-Profits
+
+ggplot(filter(HBF_RDD, rfp_b_organization_type == "For-Profit Organization"), aes(x = average, y = fp_spec_avg, color = final_decision_for_rfp)) +
+  geom_point(size = 1, alpha = 0.5) +
+  geom_smooth(data = filter(HBF_RDD, average <= 2.644065), method = "lm") +
+  geom_smooth(data = filter(HBF_RDD, average > 2.644065), method = "lm") +
+  geom_vline(xintercept = 2.644065) +
+  scale_color_manual(values = c("green", "red")) +
+  labs(x = "Overall Average", y = "For-Profit Special Questions Average", color = "Selected/Not Selected")
 
 
