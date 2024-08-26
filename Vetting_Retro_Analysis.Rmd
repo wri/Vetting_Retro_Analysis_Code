@@ -467,7 +467,8 @@ TF_RDD <- TF_RDD %>%
 # plotting the relationship between general and expert reviewers
 ggplot(TF_RDD, aes(x= gen_avg, y= exp_avg, color = final_application_decision)) +
   geom_point(size = 1.5, alpha = 0.5, position = position_jitter(width = 0, height = 0.25, seed = 1234)) + 
-  geom_vline(xintercept = 3.457225) + 
+  geom_segment(x = 0, xend = 3.627213, y = 3.377784, yend = 3.377784, color = "black") +
+  geom_segment(x = 3.627213, xend = 3.627213, y = 0, yend = 3.377784, color = "black") +
   labs(x = "General Reviewer Average Score", y = "Expert Reviewer Average Score") + 
   guides(color = FALSE)
 
