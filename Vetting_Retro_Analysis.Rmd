@@ -34,7 +34,7 @@ library(modelsummary)
 library(kableExtra)
 library(rpart)
 library(rpart.plot)
-library(randomForest)
+library(ggplot2)
 
 
 setwd("/Users/neilstein/Documents/Work/WRI/Research/TerraFund Vetting")
@@ -487,8 +487,6 @@ HBF_numeric_cols <- sapply(HBF_RDD, is.numeric)
 # calculating an average 'GPA' in order to create a baseline spectrum
 HBF_RDD <- HBF_RDD %>%
   mutate(average = rowMeans(HBF_RDD[, HBF_numeric_cols], na.rm = TRUE))
-
-
 
 
 # uniquely for HBF - we can do detailed groupings based on selection decision disagreement
